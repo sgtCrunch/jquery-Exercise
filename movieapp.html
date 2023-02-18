@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <link rel="stylesheet"
+        href="https://unpkg.com/bootstrap/dist/css/bootstrap.css">
+  <style>
+
+    img {
+      max-width: 70%;
+    }
+
+    .image-center {
+      display: block;
+      margin: 10px auto;
+    }
+
+    #reviews{
+        margin: 20px;
+    }
+
+    .card{
+        margin: 20px;
+    }
+
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <h1 id="title" class="text-center">Movie Reviews</h1>
+  
+  <div class="row mb-5">
+    <h4>Movie Title</h4>
+    <input class="form-control" type="text" value="title">
+    <h4>Rating</h4>
+    <input class="form-control" type="number" min="0" max="10" value="5">
+    <input class="btn btn-primary" type="submit">
+  </div>
+</div>
+
+<div class="btn-group btn-group-toggle" data-toggle="buttons">
+    <label class="btn btn-secondary">
+      <input type="radio" name="options" id="alpha" autocomplete="off"> Alphabetical
+    </label>
+    <label class="btn btn-secondary">
+      <input type="radio" name="options" id="high" autocomplete="off"> Rating H->L
+    </label>
+    <label class="btn btn-secondary">
+        <input type="radio" name="options" id="low" autocomplete="off"> Rating L->H
+    </label>
+</div>
+
+<div id="reviews" class="row mb-5"></div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+
+<script>
+    let movies = [];
+
+    function makeMovieCard(title, rating){
+
+        return `<div class="card" style="width: 18rem;">
+                    <div class="card-body">
+                        <h5 class="card-title">${title}</h5>
+                        <h6 class="cad-subtitle mb-2 text-muted">Rating: ${rating}</h6>
+                        <a href="#" class="card-link">remove</a>
+                    </div>
+                </div>`;
+    }
+
+    function sortMovies(by){
+
+        if(by === "alpha"){
+            return movies.sort((a,b)=>{
+                if (a.title < b.title) {
+                    return -1;
+                }
+                if (a.title > b.title) {
+                    return 1;
+                }
+                return 0;
+            });
+        }
+        else if(by === "high") {
+            return movies.sort((a,b) => {
+                if (a.rating > b.rating) {
+                    return -1;
+                }
+                if (a.rating < b.rating) {
+                    return 1;
+                }
+                return 0;
+            });
+        }
+        else if(by === "low") {
+            return movies.sort((a,b) => {
+                if (a.rating > b.rating) {
+                    return 1;
+                }
+                if (a.rating < b.rating) {
+                    return -1;
+                }
+                return 0;
+            });
+        }
+        return movies;
+    }
+
+    function updateReviews(m){
+        const reviews = $('#reviews').html("");
+        for(let i in m){
+            $(makeMovieCard(m[i].title, m[i].rating)).appendTo("#reviews");
+        }
+    }
+
+    $("input[type=submit]").on("click", function(){
+
+        const movieRating = $(this).prev("input").val();
+        let movieTitle = $('input[type=text]').val();
+        if(+movieRating < 0 || +movieRating > 10 || movieTitle.length < 2) return;
+        movieTitle = movieTitle[0].toUpperCase() + movieTitle.slice(1);
+
+        $(makeMovieCard(movieTitle, movieRating)).prependTo("#reviews");
+        movies.push({title:movieTitle, rating:+movieRating});
+    });
+
+    $("#reviews").on("click", ".card-link", function(){
+        const movieDeleted = $(this).parent().children('h5').text();
+        
+        movies = movies.filter((movie) =>{
+            return movie.title !== movieDeleted;
+        });
+        $(this).parent().parent().remove();
+        
+    });
+
+    $(".btn-group").on("click","input[type=radio]", function(){
+        updateReviews(sortMovies($(this).attr("id")));
+    });
+
+
+    
+</script>
+
+</body>
+
+</html>
